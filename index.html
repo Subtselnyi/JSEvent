@@ -28,13 +28,18 @@ input { border: 1px solid green; width: 80px; }
 #usersconnections { float:right; margin-top: -400px;  }
 </style>
 <script>
-  var line=5;
+
+  var line=0;
   var w=80;
   var h=17;
   var table = document.getElementById('table');
   var cells = {};
   var letters = ['A', 'B', 'C', 'D', 'E', 'F'];
- 
+  var colours=[];
+
+  colours.push('#070707');
+  colours.push('#F10C1D');
+  colours.push('#160CF1'); 
 
   var tr;
   tr = document.createElement('tr');
@@ -45,108 +50,74 @@ input { border: 1px solid green; width: 80px; }
   table.appendChild(tr);
 
   for (var i = 1; i <= 5; i++) {
-    tr = document.createElement('tr');
-    tr.innerHTML = '<td>' + i + '</td>' + letters.map(function(col) {
-      return '<td><input id="' + col + i + '" type="text"></td>';
-    }).join('');
-    table.appendChild(tr);
-    letters.forEach(function(col) {
-      var cell = col + i;
-      var input = document.getElementById(cell);
-      input.addEventListener('keyup', keyup);
-      
-      cells[cell] = input;
-    });
+    addline();
   }
 
-  var button1 = document.getElementById('button1');
-  var button2 = document.getElementById('button2');
-  var colour = document.getElementById('colour');  
-  var button3 = document.getElementById('button3');
-  var button4 = document.getElementById('button4');
-  var button5 = document.getElementById('button5');
+  var button1 = document.getElementById('button1'),
+     button2 = document.getElementById('button2'),
+     colour = document.getElementById('colour'),  
+     button3 = document.getElementById('button3'),
+     button4 = document.getElementById('button4'),
+     button5 = document.getElementById('button5');
+
+  button1.addEventListener('click', keyup);
+
+  button2.addEventListener('click', keyup);      
+  
+  colour.addEventListener('click',function(event){
+    console.log(event.target.value);
+    table.style.backgroundColor = colours[+event.target.value-1];
+    }
+  );
+
+  button3.addEventListener('click', function(event) {
+     socket.send(JSON.stringify({
+       cell: event.target.id,
+       value: table.style.backgroundColor
+       })
+     );
+   });
+
+
+  button4.onclick = function(){    
+    modify(w+=10,h+=5);
+  }
+
+  button5.onclick = function(){
+    modify(w-=10,h-=5);;
+  }
+
+
 
   function addUser(cell,client){
       document.getElementById('first').value += 'Cell ' + cell + ' was modifed by ' + client +' IP' + '\n';
 
   }
   
-function addConnection(client){
+  function addConnection(client){
       document.getElementById('second').value += 'Cconnected User with ' + client +' IP ' + '\n';
-  }
+  } 
 
   function keyup(event) {
     socket.send(JSON.stringify({
       cell: event.target.id,
       value: event.target.value
-    }));
+      })
+    );
   }
 
-  button1.addEventListener('click', function(event) {
-     socket.send(JSON.stringify({
-      cell: event.target.id,
-      value: event.target.value
-    }));
-     } );
-
-  button2.addEventListener('click', function(event) {
-     socket.send(JSON.stringify({
-      cell: event.target.id,
-      value: event.target.id
-    }));
-     } );
-    
-     
-
-  colour.addEventListener('click',function(event){
-    console.log(event.target.value);
-    switch (event.target.value) {
-    case ("1") : table.style.backgroundColor = '#070707'; break;;
-    case ("2") : table.style.backgroundColor = '#F10C1D';break;;
-    case ("3") : table.style.backgroundColor = '#160CF1';break;;
-    case ("4") : table.style.backgroundColor = '#E5E5E5';break;;
-    case ("5") : table.style.backgroundColor = '#E5E5E5';break;;
-  }
-    });
-
-   button3.addEventListener('click', function(event) {
-     socket.send(JSON.stringify({
-      cell: event.target.id,
-      value: table.style.backgroundColor
-    }));
-     } );
-  
-   button4.onclick = function(){
-    w=w+10; h+=5;
-    for (var i = 1; i <= line; i++) {
-     tr = document.createElement('tr');
+  function modify(w,h){    
+   for (var i = 1; i <= line; i++) {
+    tr = document.createElement('tr');
     letters.forEach(function(col) {
-      var cell = col + i;
-      var input = document.getElementById(cell);
-      input.style.width = w + 'px';
-      input.style.height = h + 'px';
-
-      cells[cell] = input;
+     var cell = col + i;
+     var input = document.getElementById(cell);
+     input.style.width = w + 'px';
+     input.style.height = h + 'px';
+     cells[cell] = input;
     });
-  }
    }
-
-button5.onclick = function(){
-    w=w-10; h-=5;
-    for (var i = 1; i <= line; i++) {
-     tr = document.createElement('tr');
-    letters.forEach(function(col) {
-      var cell = col + i;
-      var input = document.getElementById(cell);
-      input.style.width = w + 'px';
-      input.style.height = h + 'px';
-
-      cells[cell] = input;
-    });
   }
-   }
-
-
 
   function addline(){
     line++;
@@ -168,29 +139,39 @@ button5.onclick = function(){
   function changeTable(hash,client){
       table.style.backgroundColor = hash;
       document.getElementById('first').value += 'Table was modefied by ' + client +' IP' + '\n';
-
   }
 
   function popline(){
- document.getElementById('table').deleteRow(line);
-line--;
-    }
+    document.getElementById('table').deleteRow(line);
+    line--;
+  }
 
   var socket = new WebSocket('ws://127.0.0.1/');
   var user;
   socket.onmessage = function(event) {
     var change = JSON.parse(event.data);
-    if (change.cell=='button1'){ console.log('button1');  addline(); };
-    if (change.cell=='button2'){ console.log('button2'); popline();   };
-    if (!change.cell) addConnection(change);
-    if (change.cell=='button3') { console.log('button3');changeTable(change.value,change.user) }
+    if (change.cell=='button1'){ 
+      console.log('button1'); 
+      addline();
+    }
+    if (change.cell=='button2'){
+      console.log('button2'); 
+      popline();   
+    };
+    if (!change.cell){
+      addConnection(change);
+    }
+    if (change.cell=='button3') { 
+      console.log('button3');
+      changeTable(change.value,change.user) 
+    }
     if(change.cell!='button1' &&change.cell!='button2'){
-    var cell = cells[change.cell];
-    cell.value = change.value;
-    user = change.user;
-    addUser(change.cell,user);
+      var cell = cells[change.cell];
+      cell.value = change.value;
+      user = change.user;
+      addUser(change.cell,user);
+    }
   }
-  };
 
 </script>
 </body>

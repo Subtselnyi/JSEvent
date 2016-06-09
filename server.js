@@ -2,13 +2,10 @@ global.api = {};
 api.fs = require('fs');
 api.http = require('http');
 api.websocket = require('websocket');
-//api.url = require('url');
 
 var index = api.fs.readFileSync('./index.html');
 
 var server = api.http.createServer(function(req, res) {
-  //var pathname = url.parse(req.url).pathname;
-  //console.log("request for" + pathname +"recieved.");
   res.writeHead(200);
   res.end(index);
 });
@@ -33,52 +30,50 @@ ws.on('request', function(req) {
       ClientName = JSON.stringify(ClientName);
       clients.forEach(function(client) {      
         client.send(ClientName);
-    });
+      });
 
   connection.on('message', function(message) {
     var dataName = message.type + 'Data' ,
        data = message[dataName];
        data = JSON.parse(data);
 
-       if (data.cell=='button1') {
-        data = JSON.stringify(data);
-        clients.forEach(function(client) {        
-       console.log('Received button1: ' + data);        
-        client.send(data);
-
-    });}
+        if (data.cell=='button1') {
+          data = JSON.stringify(data);
+          clients.forEach(function(client) {        
+            console.log('Received button1: ' + data);        
+            client.send(data);
+          });
+        }
 
         else if (data.cell=='button2') {
           data = JSON.stringify(data);
-        clients.forEach(function(client) {
-        
-       console.log('Received button2: ' + data);
-
-        client.send(data);
-
-    });}
+          clients.forEach(function(client) {        
+            console.log('Received button2: ' + data);
+            client.send(data);
+          });
+        }
 
         else if (data.cell=='button3'){
           data.user = connection.remoteAddress;
           data = JSON.stringify(data);
           console.log('Recieved button3:' + data);
           clients.forEach(function(client) {
-        if (connection !== client) {
-        client.send(data);
-        }});
-      }
+            if (connection !== client) {
+            client.send(data);
+            }
+          });
+        }
 
-       else if(data.value!='Addline' && data.value!='Delline' ){
-       data.user = connection.remoteAddress;
-       data = JSON.stringify(data);
-       console.log('Received: ' + data);
-
-
-    clients.forEach(function(client) {
-      if (connection !== client) {
-        client.send(data);
-
-      } }) }
+        else if(data.value!='Addline' && data.value!='Delline' ){
+          data.user = connection.remoteAddress;
+          data = JSON.stringify(data);
+          console.log('Received: ' + data);
+          clients.forEach(function(client) {
+            if (connection !== client) {
+             client.send(data);
+             } 
+          }) 
+        }
     });
   connection.on('close', function(reasonCode, description) {
     console.log('Disconnected ' + connection.remoteAddress);
