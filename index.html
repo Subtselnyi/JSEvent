@@ -4,8 +4,9 @@
 <div>
 <h1>Live table</h1>
 <button id="button1" value="Addline">Add line</button>
-<button id="button2" value="Delline">Delete row</button>
+<button id="button2" value="Delline">Delete line</button>
 <button id="button4" value="More">+</button>
+<button id="button5" value="Less">-</button>
 <table id="table"></table>
 <h2>Users</h2>
 <textarea id="first"  style="width:600px;" rows="10"></textarea>
@@ -28,6 +29,8 @@ input { border: 1px solid green; width: 80px; }
 </style>
 <script>
   var line=5;
+  var w=80;
+  var h=17;
   var table = document.getElementById('table');
   var cells = {};
   var letters = ['A', 'B', 'C', 'D', 'E', 'F'];
@@ -51,6 +54,7 @@ input { border: 1px solid green; width: 80px; }
       var cell = col + i;
       var input = document.getElementById(cell);
       input.addEventListener('keyup', keyup);
+      
       cells[cell] = input;
     });
   }
@@ -60,6 +64,8 @@ input { border: 1px solid green; width: 80px; }
   var colour = document.getElementById('colour');  
   var button3 = document.getElementById('button3');
   var button4 = document.getElementById('button4');
+  var button5 = document.getElementById('button5');
+
   function addUser(cell,client){
       document.getElementById('first').value += 'Cell ' + cell + ' was modifed by ' + client +' IP' + '\n';
 
@@ -90,6 +96,8 @@ function addConnection(client){
     }));
      } );
     
+     
+
   colour.addEventListener('click',function(event){
     console.log(event.target.value);
     switch (event.target.value) {
@@ -108,6 +116,37 @@ function addConnection(client){
     }));
      } );
   
+   button4.onclick = function(){
+    w=w+10; h+=5;
+    for (var i = 1; i <= line; i++) {
+     tr = document.createElement('tr');
+    letters.forEach(function(col) {
+      var cell = col + i;
+      var input = document.getElementById(cell);
+      input.style.width = w + 'px';
+      input.style.height = h + 'px';
+
+      cells[cell] = input;
+    });
+  }
+   }
+
+button5.onclick = function(){
+    w=w-10; h-=5;
+    for (var i = 1; i <= line; i++) {
+     tr = document.createElement('tr');
+    letters.forEach(function(col) {
+      var cell = col + i;
+      var input = document.getElementById(cell);
+      input.style.width = w + 'px';
+      input.style.height = h + 'px';
+
+      cells[cell] = input;
+    });
+  }
+   }
+
+
 
   function addline(){
     line++;
@@ -120,6 +159,8 @@ function addConnection(client){
       var cell = col + line;
       var input = document.getElementById(cell);
       input.addEventListener('keyup', keyup);
+      input.style.width = w + 'px';
+      input.style.height = h + 'px';
       cells[cell] = input;
     });
   }
