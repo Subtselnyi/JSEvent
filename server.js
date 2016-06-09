@@ -40,24 +40,35 @@ ws.on('request', function(req) {
        data = message[dataName];
        data = JSON.parse(data);
 
-       if (data.button==1) {
-        clients.forEach(function(client) {
+       if (data.cell=='button1') {
         data = JSON.stringify(data);
-       console.log('Received: ' + data);
+        clients.forEach(function(client) {        
+       console.log('Received button1: ' + data);        
+        client.send(data);
+
+    });}
+
+        else if (data.cell=='button2') {
+          data = JSON.stringify(data);
+        clients.forEach(function(client) {
         
-        client.send(data);
-
-    });}
-
-        if (data.button==2) {
-        clients.forEach(function(client) {
-        data = JSON.stringify(data);
-       console.log('Received: ' + data);
+       console.log('Received button2: ' + data);
 
         client.send(data);
 
     });}
-        if(data.cell){
+
+        else if (data.cell=='button3'){
+          data.user = connection.remoteAddress;
+          data = JSON.stringify(data);
+          console.log('Recieved button3:' + data);
+          clients.forEach(function(client) {
+        if (connection !== client) {
+        client.send(data);
+        }});
+      }
+
+       else if(data.value!='Addline' && data.value!='Delline' ){
        data.user = connection.remoteAddress;
        data = JSON.stringify(data);
        console.log('Received: ' + data);
