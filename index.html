@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html>
+<body>
+<div>
+<h1>Live table</h1>
+<button id="button1">Add line</button>
+<button id="button2">Add row</button>
+<table id="table"></table>
+<h2>Users</h2>
+<textarea id="first"  style="width:600px;" rows="10"></textarea>
+</div>
+<div id="usersconnections">
+<textarea id="second"  style="width:200px;" rows="5"></textarea>
+</div>
+<style>
+input { border: 1px solid green; width: 80px; }
+#usersconnections { float:right; margin-top: -400px;  }
+</style>
+<script>
+
+  var table = document.getElementById('table');
+  var cells = {};
+  var letters = ['A', 'B', 'C', 'D', 'E', 'F'];
+
+  var tr;
+  tr = document.createElement('tr');
+
+  tr.innerHTML = '<td></td>' + letters.map(function(col) {
+    return '<td>' + col + '</td>';
+  }).join('');
+  table.appendChild(tr);
+
+  for (var i = 1; i <= 5; i++) {
+    tr = document.createElement('tr');
+    tr.innerHTML = '<td>' + i + '</td>' + letters.map(function(col) {
+      return '<td><input id="' + col + i + '" type="text"></td>';
+    }).join('');
+    table.appendChild(tr);
+    letters.forEach(function(col) {
+      var cell = col + i;
+      var input = document.getElementById(cell);
+      input.addEventListener('keyup', keyup);
+      cells[cell] = input;
+    });
+  }
+/*
+  var button1 = document.getElementById('button1');
+  var button2 = document.getElementById('button2');
+    button1.onclick = function(){
+        socket.send(JSON.stringify({
+         button: 1;
+    }));  
+    }
+
+    button2.onclick = function(){
+        socket.send(JSON.stringify({
+         button: 2;
+    }));  
+    }
+  */
+  function addUser(cell,client){
+      document.getElementById('first').value += 'Cell ' + cell + ' was modifed by ' + client +' IP' + '\n';
+
+  }
+  
+function addConnection(client){
+      document.getElementById('second').value += 'Cconnected User with ' + client +' IP ' + '\n';
+
+  }
+
+  function keyup(event) {
+    socket.send(JSON.stringify({
+      cell: event.target.id,
+      value: event.target.value
+    }));
+  }
+/*  var line=5;
+  function addline(){
+    line++;
+    letters.forEach(function(col) {
+      var cell = col + line;
+      var input = document.getElementById(cell);
+      input.addEventListener('keyup', keyup);
+      cells[cell] = input;
+    });
+  }
+  function addrow(){}*/
+
+  var socket = new WebSocket('ws://127.0.0.1/');
+  var user;
+  socket.onmessage = function(event) {
+    var change = JSON.parse(event.data);
+    if (change.button==1){  addline();  };
+    if (change.button==2){  addrow();  };
+    if (!change.cell && !change.button) addConnection(change);
+    if(change.cell){
+    var cell = cells[change.cell];
+    cell.value = change.value;
+    user = change.user;
+    addUser(change.cell,user);
+  }
+  };
+
+</script>
+</body>
+</html>
