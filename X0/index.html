@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html>
+<body>
+<h1>Play x0</h1>
+<button id="x">take "x"</button>
+<button id="0">take "0"</button>
+<table id="table"></table>
+<style>
+input { border: 1px solid green; width: 30px; }
+</style>
+<script>
+
+  var table = document.getElementById('table');
+  var cells = {};
+  var letters = ['A', 'B', 'C'];
+  var button1 = document.getElementById('x');
+  var button2 = document.getElementById('0');
+  var button;
+
+  var tr;
+  tr = document.createElement('tr');
+  tr.innerHTML = '<td></td>' + letters.map(function(col) {
+    return '<td>' + col + '</td>';
+  }).join('');
+  table.appendChild(tr);
+
+  for (var i = 1; i <= 3; i++) {
+    tr = document.createElement('tr');
+    tr.innerHTML = '<td>' + i + '</td>' + letters.map(function(col) {
+      return '<td><input id="' + col + i + '" type="text"></td>';
+    }).join('');
+    table.appendChild(tr);
+    letters.forEach(function(col) {
+      var cell = col + i;
+      var input = document.getElementById(cell);
+      input.addEventListener('click', keyup);
+      cells[cell] = input;
+    });
+  }
+
+  button1.onclick = function(){
+      button1.disabled = false;
+      button = 1;
+      socket.send(JSON.stringify({
+        button: 1;
+      }))
+  }
+
+ button2.onclick = function(){
+      button2.disabled = false;
+      button = 2;
+      socket.send(JSON.stringify({
+        button: 0;
+      }))
+  }
+
+  function keyup(event) {
+    if (button){
+      var input = document.getElementById(event.target.id);
+      event.tareget.value = "x";
+      input.disabled = true;
+    socket.send(JSON.stringify({
+      cell: event.target.id,
+      value: "x"
+    }));
+  }
+    if (!button){
+      var input = document.getElementById(event.target.id);
+      event.tareget.value = "0";
+      input.disabled = true;
+      socket.send(JSON.stringify({
+      cell: event.target.id,
+      value: "0"
+    }));
+    }
+  }
+
+  var socket = new WebSocket('ws://127.0.0.1/');
+
+  socket.onmessage = function(event) {
+    var change = JSON.parse(event.data);
+    var cell = cells[change.cell];
+    cell.value = change.value;
+  };
+
+</script>
+</body>
+</html>
