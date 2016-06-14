@@ -23,9 +23,14 @@
  </select>
  <button id="button3" value="changeColour">Change for All users</button>
 </div>
+<div id="modification">
+<h3>Last modified</h3>
+<textarea id="third"  style="width:200px;" rows="3"></textarea>
+</div>
 <style>
 input { border: 1px solid green; width: 80px; }
 #usersconnections { float:right; margin-top: -400px;  }
+#modification {float:right; margin-top:-200px;}
 </style>
 <script>
 
@@ -36,6 +41,7 @@ input { border: 1px solid green; width: 80px; }
   var cells = {};
   var letters = ['A', 'B', 'C', 'D', 'E', 'F'];
   var colours=[];
+  var time=[];
 
   colours.push('#070707');
   colours.push('#F10C1D');
@@ -54,11 +60,11 @@ input { border: 1px solid green; width: 80px; }
   }
 
   var button1 = document.getElementById('button1'),
-     button2 = document.getElementById('button2'),
-     colour = document.getElementById('colour'),  
-     button3 = document.getElementById('button3'),
-     button4 = document.getElementById('button4'),
-     button5 = document.getElementById('button5');
+      button2 = document.getElementById('button2'),
+      colour = document.getElementById('colour'),  
+      button3 = document.getElementById('button3'),
+      button4 = document.getElementById('button4'),
+      button5 = document.getElementById('button5');
 
   button1.addEventListener('click', keyup);
 
@@ -98,12 +104,19 @@ input { border: 1px solid green; width: 80px; }
       document.getElementById('second').value += 'Cconnected User with ' + client +' IP ' + '\n';
   } 
 
-  function keyup(event) {
+  function keyup(event) {    
+    var timing = new Date();
+    time[event.target.id] = timing;
     socket.send(JSON.stringify({
       cell: event.target.id,
-      value: event.target.value
+      value: event.target.value,
+      time: timing
       })
     );
+  }
+
+  function mouseover(event){
+    document.getElementById('third').value = event.target.id + ' modificated ' + time[event.target.id];
   }
 
   function modify(w,h){    
@@ -130,9 +143,11 @@ input { border: 1px solid green; width: 80px; }
       var cell = col + line;
       var input = document.getElementById(cell);
       input.addEventListener('keyup', keyup);
+      input.addEventListener('mouseover', mouseover)
       input.style.width = w + 'px';
       input.style.height = h + 'px';
       cells[cell] = input;
+      time[cell] = "not modified";
     });
   }
 
@@ -169,6 +184,9 @@ input { border: 1px solid green; width: 80px; }
       var cell = cells[change.cell];
       cell.value = change.value;
       user = change.user;
+      //var msUTC = (Date.parse(change.time));
+      //time[change.cell] = msUTC;
+      time[change.cell] = change.time;
       addUser(change.cell,user);
     }
   }
